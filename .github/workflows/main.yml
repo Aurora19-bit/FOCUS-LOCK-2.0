@@ -27,24 +27,12 @@ jobs:
           gradle-version: '8.5'
 
       - name: Build Debug APK
-        run: |
-          # Navigate into the subfolder if present
-          if [ -d "FocusLock/app" ]; then
-            cd FocusLock
-          fi
-
-          # Accept Android SDK licenses
-          yes | sdkmanager --licenses || true
-
-          # Generate the wrapper if missing and run the build
-          gradle wrapper
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-Debug-APK
-          path: "**/build/outputs/apk/debug/*.apk"
+          path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
           
