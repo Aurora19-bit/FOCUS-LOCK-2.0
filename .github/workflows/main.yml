@@ -21,21 +21,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Set up Gradle 8.5
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.5'
 
       - name: Build Debug APK
         run: |
-          # Detect whether the project is inside FocusLock folder or root
+          # Navigate into the subfolder if present
           if [ -d "FocusLock/app" ]; then
             cd FocusLock
           fi
-          gradle assembleDebug --stacktrace
+
+          # Accept Android SDK licenses
+          yes | sdkmanager --licenses || true
+
+          # Generate the wrapper if missing and run the build
+          gradle wrapper
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -43,3 +47,4 @@ jobs:
           name: FocusLock-Debug-APK
           path: "**/build/outputs/apk/debug/*.apk"
           retention-days: 14
+          
