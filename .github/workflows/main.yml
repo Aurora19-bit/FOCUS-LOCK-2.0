@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,16 +22,22 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # Sets up gradle wrapper if gradlew is missing from the repository
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
+      # Runs the build inside the FocusLock subfolder if present, otherwise root
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          if [ -d "FocusLock" ]; then
+            cd FocusLock
+          fi
+          gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-Debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
           retention-days: 14
           
